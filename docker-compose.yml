@@ -1,0 +1,94 @@
+services:
+  food-app:
+    image: food-app:latest
+    container_name: food-app
+    networks:
+      - default
+    expose:
+      - "8094"
+    ports:
+      - "8094:8080"
+      - "5005:5005"
+    depends_on:
+      - food-postgres
+
+  food-postgres:
+    image: library/postgres:14
+    container_name: food-postgres
+    networks:
+      - default
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fooddb
+      POSTGRES_PORT: 5432
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  keycloak-food:
+    image: quay.io/keycloak/keycloak:20.0.2
+    hostname: keycloak-food
+    container_name: keycloak-food
+    networks:
+      - default
+    command:
+      - start --db postgres --hostname-strict-https false --hostname-strict false --proxy edge --http-enabled true --spi-user-profile-legacy-user-profile-read-only-attributes *_RES_ACCESS_MODE
+    environment:
+      KC_DB_URL: jdbc:postgresql://keycloak-food-postgres:5432/postgres
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_SCHEMA: public
+      KC_FEATURES: preview
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - type: bind
+        source: ./keycloak/import/realm-export.json
+        target: /opt/keycloak/data/import/realm-export.json
+        read_only: true
+    ports:
+      - "8282:8080"
+    depends_on:
+      keycloak-food-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master" ]
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s
+
+  keycloak-food-postgres:
+    image: library/postgres:14
+    container_name: keycloak-food-postgres
+    networks:
+      - default
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PORT: 5496
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "5496:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
