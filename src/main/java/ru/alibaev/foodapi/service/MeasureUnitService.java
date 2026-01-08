@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.alibaev.foodapi.mapper.MeasureUnitMapper;
 import ru.alibaev.foodapi.model.domain.MeasureUnit;
 import ru.alibaev.foodapi.model.domain.MeasureUnitForCount;
-import ru.alibaev.foodapi.model.entity.ManyFieldable;
 import ru.alibaev.foodapi.model.entity.MeasureUnitEntity;
 import ru.alibaev.foodapi.repository.MeasureUnitRepository;
 import ru.alibaev.foodapi.util.MeasureUnitResolver;
@@ -36,6 +35,7 @@ public class MeasureUnitService {
                     MeasureUnitForCount result = new MeasureUnitForCount();
                     result.setCount(count);
                     result.setMeasureUnit(MeasureUnitResolver.resolveMeasureUnitName(entity, count));
+                    result.setUuid(entity.getUuid());
                     return result;
                 })
                 .toList();
