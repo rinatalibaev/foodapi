@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/openjdk-21:latest as build
+FROM registry.access.redhat.com/ubi9/openjdk-21:latest AS build
 USER root
 COPY . .
 RUN cp ./build/libs/foodapi-*-SNAPSHOT.jar /app.jar

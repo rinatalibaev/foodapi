@@ -22,6 +22,8 @@ public class Recipe extends BaseDomain {
     private List<Step> steps;
     private List<RecipeIngredient> ingredients;
     private Set<Comment> comments;
+    private boolean favorite;
+    private int preparedCount;
 
 }
 

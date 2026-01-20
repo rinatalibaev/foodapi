@@ -41,14 +41,14 @@ public class FavoriteController implements FavoriteApi {
         favoriteService.deleteFavorite(recipeUuid);
     }
 
-    @Override
-    @GetMapping
-    public List<RecipeResponse> getFavorites() {
-        List<Recipe> favoriteRecipes = favoriteService.getUserFavorites();
-        return favoriteRecipes.stream()
-                .map(recipeMapper::toResponse)
-                .toList();
-    }
+//    @Override
+//    @GetMapping
+//    public List<RecipeResponse> getFavorites() {
+//        List<Recipe> favoriteRecipes = favoriteService.getUserFavorites();
+//        return favoriteRecipes.stream()
+//                .map(recipeMapper::toResponse)
+//                .toList();
+//    }
 
 }
 

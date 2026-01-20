@@ -22,7 +22,7 @@ public class FavoriteService {
     private final FavoriteRepository repository;
     private final FavoriteMapper mapper;
     private final UserUuidProvider userUuidProvider;
-    private final RecipeService recipeService;
+//    private final RecipeService recipeService;
 
     public void addFavorite(Favorite favorite) {
         repository.addFavorite(userUuidProvider.provide(), favorite.getRecipeUuid());
@@ -32,12 +32,12 @@ public class FavoriteService {
         repository.deleteByUser_UuidAndRecipe_Uuid(userUuidProvider.provide(), recipeUuid);
     }
 
-    public List<Recipe> getUserFavorites() {
-        return recipeService.getRecipesByUuids(
-                repository.findAllByUser_Uuid(userUuidProvider.provide()).stream()
-                        .map(FavoriteEntity::getRecipe)
-                        .map(BaseEntity::getUuid)
-                        .toList());
-    }
+//    public List<Recipe> getUserFavorites() {
+//        return recipeService.getRecipesByUuids(
+//                repository.findAllByUser_Uuid(userUuidProvider.provide()).stream()
+//                        .map(FavoriteEntity::getRecipe)
+//                        .map(BaseEntity::getUuid)
+//                        .toList());
+//    }
 }
 

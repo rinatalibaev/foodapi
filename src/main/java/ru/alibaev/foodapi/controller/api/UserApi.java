@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.alibaev.foodapi.model.dto.request.UserRegistrationRequest;
-import ru.alibaev.foodapi.model.dto.request.UserRequest;
+import ru.alibaev.foodapi.model.dto.request.UserUpdateRequest;
 import ru.alibaev.foodapi.model.dto.response.UserRegistrationResponse;
 import ru.alibaev.foodapi.model.dto.response.UserResponse;
 
@@ -24,7 +24,7 @@ public interface UserApi {
 
     @Operation(summary = "Обновить пользователя")
     void update(@Parameter(description = "UUID пользователя") @PathVariable UUID uuid,
-                @RequestBody UserRequest request);
+                @RequestBody UserUpdateRequest request);
 
     @Operation(summary = "Получить всех пользователей")
     List<UserResponse> getAll();

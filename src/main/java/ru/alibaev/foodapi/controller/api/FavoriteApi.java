@@ -29,10 +29,10 @@ public interface FavoriteApi {
     })
     void removeFavorite(@PathVariable UUID recipeUuid);
 
-    @Operation(summary = "Список избранных рецептов пользователя")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Список избранных рецептов")
-    })
-    List<RecipeResponse> getFavorites();
+//    @Operation(summary = "Список избранных рецептов пользователя")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Список избранных рецептов")
+//    })
+//    List<RecipeResponse> getFavorites();
 }
 

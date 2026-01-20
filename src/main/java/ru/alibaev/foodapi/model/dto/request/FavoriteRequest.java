@@ -7,6 +7,6 @@ import java.util.UUID;
 
 @Data
 public class FavoriteRequest {
-    @Schema(description = "UUID рецепта")
+    @Schema(description = "UUID рецепта", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID recipeUuid;
 }

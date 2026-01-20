@@ -14,7 +14,7 @@ import ru.alibaev.foodapi.config.properties.KeycloakProperties;
 import ru.alibaev.foodapi.mapper.UserMapper;
 import ru.alibaev.foodapi.model.domain.User;
 import ru.alibaev.foodapi.model.dto.request.UserRegistrationRequest;
-import ru.alibaev.foodapi.model.dto.request.UserRequest;
+import ru.alibaev.foodapi.model.dto.request.UserUpdateRequest;
 import ru.alibaev.foodapi.model.entity.AppUserEntity;
 import ru.alibaev.foodapi.model.entity.ImageEntity;
 import ru.alibaev.foodapi.model.entity.base.BaseEntity;
@@ -93,7 +93,7 @@ public class UserService {
     }
 
     @Transactional
-    public void update(UUID uuid, UserRequest request) {
+    public void update(UUID uuid, UserUpdateRequest request) {
         AppUserEntity entity = userRepository.findByUuidAndDeletedAtIsNull(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 

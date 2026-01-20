@@ -328,4 +328,31 @@
                                  constraintName="fk_comment_image"/>
     </changeSet>
 
+    <changeSet id="010-create-prepared" author="RA">
+        <preConditions>
+            <not>
+                <tableExists tableName="prepared"/>
+            </not>
+        </preConditions>
+        <createTable tableName="prepared">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="recipe_id" type="BIGINT"/>
+            <column name="prepared_count" type="INTEGER"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="prepared"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_prep_user"/>
+        <addForeignKeyConstraint baseTableName="prepared"
+                                 baseColumnNames="recipe_id"
+                                 referencedTableName="recipe"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_prep_recipe"/>
+    </changeSet>
+
 </databaseChangeLog>

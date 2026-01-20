@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.alibaev.foodapi.controller.api.UserApi;
 import ru.alibaev.foodapi.mapper.UserMapper;
 import ru.alibaev.foodapi.model.dto.request.UserRegistrationRequest;
-import ru.alibaev.foodapi.model.dto.request.UserRequest;
+import ru.alibaev.foodapi.model.dto.request.UserUpdateRequest;
 import ru.alibaev.foodapi.model.dto.response.UserRegistrationResponse;
 import ru.alibaev.foodapi.model.dto.response.UserResponse;
 import ru.alibaev.foodapi.service.UserService;
@@ -55,7 +55,7 @@ public class UserController implements UserApi {
     @Override
     @PutMapping("/{uuid}")
     public void update(@PathVariable UUID uuid,
-                       @RequestBody UserRequest request) {
+                       @RequestBody UserUpdateRequest request) {
         userService.update(uuid, request);
     }
 
