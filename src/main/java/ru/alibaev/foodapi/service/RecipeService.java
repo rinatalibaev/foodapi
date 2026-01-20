@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.alibaev.foodapi.config.provider.UserUuidProvider;
 import ru.alibaev.foodapi.mapper.RecipeMapper;
 import ru.alibaev.foodapi.model.domain.Comment;
 import ru.alibaev.foodapi.model.domain.Recipe;
@@ -15,18 +16,13 @@ import ru.alibaev.foodapi.model.entity.MeasureUnitEntity;
 import ru.alibaev.foodapi.model.entity.RecipeEntity;
 import ru.alibaev.foodapi.model.entity.StepEntity;
 import ru.alibaev.foodapi.model.entity.base.BaseEntity;
+import ru.alibaev.foodapi.model.entity.junction.FavoriteEntity;
+import ru.alibaev.foodapi.model.entity.junction.PreparedEntity;
 import ru.alibaev.foodapi.model.entity.junction.RecipeIngredientEntity;
-import ru.alibaev.foodapi.repository.ImageRepository;
-import ru.alibaev.foodapi.repository.IngredientRepository;
-import ru.alibaev.foodapi.repository.MeasureUnitRepository;
-import ru.alibaev.foodapi.repository.RecipeRepository;
+import ru.alibaev.foodapi.repository.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +34,10 @@ public class RecipeService {
     private final IngredientRepository ingredientRepository;
     private final MeasureUnitRepository measureUnitRepository;
     private final ImageRepository imageRepository;
+    private final PreparedRepository preparedRepository;
+    private final FavoriteRepository favoriteRepository;
     private final RecipeMapper recipeMapper;
+    private final UserUuidProvider userUuidProvider;
 
     @Transactional
     public UUID createRecipe(Recipe recipeDomain, UUID photoUuid) {
@@ -70,7 +69,7 @@ public class RecipeService {
                     riEntity.setIngredient(ingredientEntity);
                 }
                 if (ri.getMeasureUnit() != null) {
-                    MeasureUnitEntity measureUnitEntity =measureUnitRepository.findByUuid(ri.getMeasureUnit().getUuid())
+                    MeasureUnitEntity measureUnitEntity = measureUnitRepository.findByUuid(ri.getMeasureUnit().getUuid())
                             .orElseThrow(() -> new IllegalArgumentException("MeasureUnit not found"));
                     riEntity.setMeasureUnit(measureUnitEntity);
                 }
@@ -84,15 +83,30 @@ public class RecipeService {
     }
 
     public List<Recipe> getAllRecipes(Pageable pageable) {
+        var preparedEntityMap = getPreparedEntityMap();
+        var favoriteEntityMap = getFavoriteEntityMap();
         return recipeRepository.findAllByDeletedAtIsNull(pageable).stream()
                 .map(recipeMapper::toDomain)
-                .collect(Collectors.toList());
+                .map(recipe -> {
+                    if (preparedEntityMap.get(recipe.getUuid()) != null) {
+                        recipe.setPreparedCount(preparedEntityMap.get(recipe.getUuid()).getPreparedCount());
+                    }
+                    recipe.setFavorite(favoriteEntityMap.get(recipe.getUuid()) != null);
+                    return recipe;
+                })
+                .toList();
     }
 
     public Recipe getRecipeByUuid(UUID uuid) {
+        var preparedEntityMap = getPreparedEntityMap();
+        var favoriteEntityMap = getFavoriteEntityMap();
         RecipeEntity recipeEntity = recipeRepository.findByUuidAndDeletedAtIsNull(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe not found"));
         Recipe recipe = recipeMapper.toDomain(recipeEntity);
+        if (preparedEntityMap.get(recipe.getUuid()) != null) {
+            recipe.setPreparedCount(preparedEntityMap.get(recipe.getUuid()).getPreparedCount());
+        }
+        recipe.setFavorite(favoriteEntityMap.get(recipe.getUuid()) != null);
         removeDeletedComments(recipe);
         return recipe;
     }
@@ -111,13 +125,33 @@ public class RecipeService {
     }
 
     private void removeDeletedComments(Recipe recipe) {
-        Iterator<Comment> iterator= recipe.getComments().iterator();
+        Iterator<Comment> iterator = recipe.getComments().iterator();
         iterator.forEachRemaining((commentEntity) -> {
             if (commentEntity.getDeletedAt() != null) {
                 iterator.remove();
             }
         });
     }
+
+    private Map<UUID, PreparedEntity> getPreparedEntityMap() {
+        UUID userUuid = userUuidProvider.provide();
+        List<PreparedEntity> preparedEntities = preparedRepository.findAllByUserUuid(userUuid);
+        return preparedEntities.stream()
+                .collect(Collectors.toMap(
+                        preparedEntity -> preparedEntity.getRecipe().getUuid(),
+                        Function.identity()));
+    }
+
+    private Map<UUID, FavoriteEntity> getFavoriteEntityMap() {
+        UUID userUuid = userUuidProvider.provide();
+        List<FavoriteEntity> favoriteEntities = favoriteRepository.findAllByUserUuid(userUuid);
+        return favoriteEntities.stream()
+                .collect(Collectors.toMap(
+                        favoriteEntity -> favoriteEntity.getRecipe().getUuid(),
+                        Function.identity()));
+    }
 }
+
+
 
 

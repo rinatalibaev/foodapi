@@ -338,7 +338,9 @@
             <column name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="user_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT">
+                <constraints unique="true"/>
+            </column>
             <column name="recipe_id" type="BIGINT"/>
             <column name="prepared_count" type="INTEGER"/>
         </createTable>

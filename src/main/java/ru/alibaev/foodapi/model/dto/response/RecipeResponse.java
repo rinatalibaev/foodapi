@@ -25,5 +25,9 @@ public class RecipeResponse {
     private List<RecipeIngredientResponse> ingredients;
     @Schema(description = "Комментарии к рецепту", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Set<CommentResponse> comments;
+    @Schema(description = "Флаг избранного рецепта", requiredMode = Schema.RequiredMode.REQUIRED)
+    private boolean favorite;
+    @Schema(description = "Количество приготовления рецепта", requiredMode = Schema.RequiredMode.REQUIRED)
+    private int preparedCount;
 }
 

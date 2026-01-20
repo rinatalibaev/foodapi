@@ -1,7 +1,9 @@
 package ru.alibaev.foodapi.model.entity.junction;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.alibaev.foodapi.model.entity.AppUserEntity;
 import ru.alibaev.foodapi.model.entity.RecipeEntity;
@@ -11,6 +13,8 @@ import ru.alibaev.foodapi.model.entity.base.BaseIdEntity;
 @Table(name = "prepared")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PreparedEntity extends BaseIdEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
