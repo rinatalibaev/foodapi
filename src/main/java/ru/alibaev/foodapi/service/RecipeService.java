@@ -16,7 +16,6 @@ import ru.alibaev.foodapi.model.entity.MeasureUnitEntity;
 import ru.alibaev.foodapi.model.entity.RecipeEntity;
 import ru.alibaev.foodapi.model.entity.StepEntity;
 import ru.alibaev.foodapi.model.entity.base.BaseEntity;
-import ru.alibaev.foodapi.model.entity.junction.FavoriteEntity;
 import ru.alibaev.foodapi.model.entity.junction.PreparedEntity;
 import ru.alibaev.foodapi.model.entity.junction.RecipeIngredientEntity;
 import ru.alibaev.foodapi.repository.*;
@@ -84,14 +83,14 @@ public class RecipeService {
 
     public List<Recipe> getAllRecipes(Pageable pageable) {
         var preparedEntityMap = getPreparedEntityMap();
-        var favoriteEntityMap = getFavoriteEntityMap();
+        var favoriteRecipesUuids = getFavoriteRecipesUuids();
         return recipeRepository.findAllByDeletedAtIsNull(pageable).stream()
                 .map(recipeMapper::toDomain)
                 .map(recipe -> {
                     if (preparedEntityMap.get(recipe.getUuid()) != null) {
                         recipe.setPreparedCount(preparedEntityMap.get(recipe.getUuid()).getPreparedCount());
                     }
-                    recipe.setFavorite(favoriteEntityMap.get(recipe.getUuid()) != null);
+                    recipe.setFavorite(favoriteRecipesUuids.contains(recipe.getUuid()));
                     return recipe;
                 })
                 .toList();
@@ -99,14 +98,14 @@ public class RecipeService {
 
     public Recipe getRecipeByUuid(UUID uuid) {
         var preparedEntityMap = getPreparedEntityMap();
-        var favoriteEntityMap = getFavoriteEntityMap();
+        var favoriteRecipesUuids = getFavoriteRecipesUuids();
         RecipeEntity recipeEntity = recipeRepository.findByUuidAndDeletedAtIsNull(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe not found"));
         Recipe recipe = recipeMapper.toDomain(recipeEntity);
         if (preparedEntityMap.get(recipe.getUuid()) != null) {
             recipe.setPreparedCount(preparedEntityMap.get(recipe.getUuid()).getPreparedCount());
         }
-        recipe.setFavorite(favoriteEntityMap.get(recipe.getUuid()) != null);
+        recipe.setFavorite(favoriteRecipesUuids.contains(recipe.getUuid()));
         removeDeletedComments(recipe);
         return recipe;
     }
@@ -142,13 +141,11 @@ public class RecipeService {
                         Function.identity()));
     }
 
-    private Map<UUID, FavoriteEntity> getFavoriteEntityMap() {
+    private List<UUID> getFavoriteRecipesUuids() {
         UUID userUuid = userUuidProvider.provide();
-        List<FavoriteEntity> favoriteEntities = favoriteRepository.findAllByUserUuid(userUuid);
-        return favoriteEntities.stream()
-                .collect(Collectors.toMap(
-                        favoriteEntity -> favoriteEntity.getRecipe().getUuid(),
-                        Function.identity()));
+        return favoriteRepository.findAllByUserUuid(userUuid).stream()
+                .map(favoriteEntity -> favoriteEntity.getRecipe().getUuid())
+                .toList();
     }
 }
 
